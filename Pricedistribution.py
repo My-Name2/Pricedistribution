@@ -8,7 +8,7 @@ from scipy import stats
 st.title("Daily Price and Return Distribution with Z-Scores")
 
 # User Inputs
-tickers_input = st.text_input("Enter tickers (comma-separated):"AAPL, MSFT", )
+tickers_input = st.text_input("Enter tickers (comma-separated):", "AAPL, MSFT")
 timeframe_option = st.selectbox("Select timeframe", ["Custom Days", "1 Year", "2 Years", "3 Years", "5 Years", "10 Years", "Max"])
 
 if timeframe_option == "Custom Days":
@@ -84,4 +84,3 @@ if st.button("Analyze"):
         st.write(f"- Today's Price: {today_price:.2f}")
         st.write(f"- Price Z-Score: {z_score_price:.2f}")
         st.write(f"- Price Percentile Rank: {percentile_rank_price:.2f}%")
-
