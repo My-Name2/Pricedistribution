@@ -73,6 +73,7 @@ if st.button("Analyze"):
         axes[0].set_ylabel("Frequency")
 
         sns.histplot(returns, bins=30, kde=True, color='orange', ax=axes[1])
+        axes[1].axvline(returns[-1], color='red', linestyle='--', linewidth=2)
         axes[1].set_title(f"{ticker} - Return Distribution (%)")
         axes[1].set_xlabel("Daily Return (%)")
         axes[1].set_ylabel("Frequency")
