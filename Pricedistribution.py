@@ -8,7 +8,7 @@ from scipy import stats
 st.title("Daily Price and Return Distribution with Z-Scores")
 
 # User Inputs
-tickers_input = st.text_input("Enter tickers (comma-separated):", "AAPL, MSFT")
+tickers_input = st.text_input("Enter tickers (comma-separated):", "^vix")
 timeframe_option = st.selectbox("Select timeframe", ["Custom Days", "1 Year", "2 Years", "3 Years", "5 Years", "10 Years", "Max"])
 
 if timeframe_option == "Custom Days":
@@ -47,7 +47,7 @@ if st.button("Analyze"):
         price_values = df[price_column].dropna().values
         returns = df[price_column].pct_change().dropna().values * 100
 
-        if len(price_values) < 2:
+        if len(price_values) < 2 or len(returns) < 2:
             st.warning(f"{ticker} does not have enough data.")
             continue
 
@@ -57,13 +57,20 @@ if st.button("Analyze"):
         z_score_price = (today_price - mean_price) / std_price if std_price != 0 else float("nan")
         percentile_rank_price = stats.percentileofscore(price_values, today_price)
 
-        results.append((ticker, price_values, returns, today_price, z_score_price, percentile_rank_price))
+        today_return = returns[-1]
+        mean_return = returns.mean()
+        std_return = returns.std()
+        z_score_return = (today_return - mean_return) / std_return if std_return != 0 else float("nan")
+        percentile_rank_return = stats.percentileofscore(returns, today_return)
 
-    # Sort tickers by Z-score
+        results.append((ticker, price_values, returns, today_price, z_score_price, percentile_rank_price,
+                        today_return, z_score_return, percentile_rank_return))
+
+    # Sort tickers by Price Z-score
     results.sort(key=lambda x: x[4])
 
     # Plotting
-    for ticker, price_values, returns, today_price, z_score_price, percentile_rank_price in results:
+    for ticker, price_values, returns, today_price, z_score_price, percentile_rank_price, today_return, z_score_return, percentile_rank_return in results:
         fig, axes = plt.subplots(1, 2, figsize=(18, 5))
 
         sns.histplot(price_values, bins=30, kde=True, color='skyblue', ax=axes[0])
@@ -73,7 +80,7 @@ if st.button("Analyze"):
         axes[0].set_ylabel("Frequency")
 
         sns.histplot(returns, bins=30, kde=True, color='orange', ax=axes[1])
-        axes[1].axvline(returns[-1], color='red', linestyle='--', linewidth=2)
+        axes[1].axvline(today_return, color='red', linestyle='--', linewidth=2)
         axes[1].set_title(f"{ticker} - Return Distribution (%)")
         axes[1].set_xlabel("Daily Return (%)")
         axes[1].set_ylabel("Frequency")
@@ -85,3 +92,6 @@ if st.button("Analyze"):
         st.write(f"- Today's Price: {today_price:.2f}")
         st.write(f"- Price Z-Score: {z_score_price:.2f}")
         st.write(f"- Price Percentile Rank: {percentile_rank_price:.2f}%")
+        st.write(f"- Today's Return: {today_return:.2f}%")
+        st.write(f"- Return Z-Score: {z_score_return:.2f}")
+        st.write(f"- Return Percentile Rank: {percentile_rank_return:.2f}%")
